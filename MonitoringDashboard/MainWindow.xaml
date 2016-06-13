@@ -1,0 +1,294 @@
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:Syncfusion="clr-namespace:Syncfusion.UI.Xaml.Charts;assembly=Syncfusion.SfChart.WPF" 
+        xmlns:input="http://schemas.syncfusion.com/wpf" 
+        xmlns:editors="clr-namespace:Syncfusion.Windows.Controls.Input;assembly=Syncfusion.SfInput.Wpf"
+        xmlns:local="clr-namespace:MonitoringDashboard" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MonitoringDashboard.MainWindow" 
+        ResizeMode="CanResizeWithGrip" 
+        Icon="App.ico" 
+        Title="Monitoring Dashboard" 
+        SnapsToDevicePixels="True" 
+        WindowStyle="SingleBorderWindow"
+        WindowState="Maximized">
+
+    <!--DataContext intialization-->
+    <Window.DataContext>
+        <local:ViewModel />
+    </Window.DataContext>
+
+    <Grid>
+        <!--Resource intialization for Chart Control-->
+        <Grid.Resources>
+            <DataTemplate x:Key="headerTemplate">
+                <TextBlock FontSize="12" Foreground="Black" Text="{Binding}" />
+            </DataTemplate>
+            <DataTemplate x:Key="legend">
+                <StackPanel Orientation="Horizontal">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Rectangle Width="15" Height="15" Fill="{Binding Interior}" />
+                        <TextBlock FontSize="16" Grid.Column="1" Foreground="Black" Text="{Binding Path=Label}" />
+                    </Grid>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate x:Key="labelTemplate">
+                <TextBlock FontSize="12" Foreground="Black" Text="{Binding Path=LabelContent}" />
+            </DataTemplate>
+            <Style TargetType="Line" x:Key="AxisStyle">
+                <Setter Property="Stroke" Value="DarkGray" />
+                <Setter Property="StrokeThickness" Value="1" />
+            </Style>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="12*" />
+            <RowDefinition Height="65*" />
+            <RowDefinition Height="25*" />
+        </Grid.RowDefinitions>
+
+        <!--Initialize the label for Description-->
+        <Label Grid.Row="0"
+               FontFamily="SegoUI" 
+               FontSize="14" 
+               HorizontalAlignment="Left" 
+               Padding="30,0,0,0"                
+               VerticalAlignment="Center">
+            Dashboard will represent data points for the metrics "cpu.usage" "memory.usage" "disk.usage" "network.usage" from the TSDB Server
+        </Label>
+
+
+        <Grid Grid.Row="1" Margin="30,10,30,10">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30*" />
+                        <ColumnDefinition Width="50*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Label HorizontalAlignment="Left" FontSize="14" VerticalAlignment="Center">Host:Port</Label>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <editors:SfTextBoxExt Height="30" Watermark="TSDBServerHost:Port" HorizontalAlignment="Left" VerticalAlignment="Center" BorderThickness="2" BorderBrush="Black" Name="connectionString" Text="{Binding Host,Mode=TwoWay}"  MinWidth="120" MaxWidth="120" />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid Grid.Column="1" Margin="15,0,0,0">
+                <Grid Margin="12,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="38*" />
+                        <ColumnDefinition Width="62*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Label HorizontalAlignment="Left" FontSize="14" VerticalAlignment="Center">Select Date</Label>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <input:SfDatePicker HorizontalAlignment="Left" Value="{Binding StartDate,Mode=TwoWay}" x:Name="datePicker" FormatString="yyyy/MM/dd" SelectorFormatString="yyyy/MM/dd-hh:mm" VerticalAlignment="Center" />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid Grid.Column="2" Margin="15,0,0,0">
+                <Grid Margin="12,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="38*" />
+                        <ColumnDefinition Width="70*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Label FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Center">Select Time</Label>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <input:SfTimePicker HorizontalAlignment="Left" x:Name="timePicker" Value="{Binding TimeStamp,Mode=TwoWay}" FormatString="hh:mm tt" VerticalAlignment="Center" />
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid Grid.Column="3" Margin="19,0,0,0">
+                <Button Margin="22,0,0,0" Command="{Binding FetachDataCommand}" HorizontalAlignment="Left" Height="30" Width="100" Content="Fetch" Name="FetchButton" Background="#0099ff" Foreground="White" FontSize="16" />
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="30,10,30,10">
+
+            <Border HorizontalAlignment="Center"
+                    VerticalAlignment="Center" 
+                    BorderThickness="2" 
+                    BorderBrush="Black" 
+                    Grid.RowSpan="2" 
+                    Visibility="Visible" 
+                    Name="borderView">
+
+                <Grid>
+                    <Grid.Resources>
+                        <Style TargetType="Line" x:Key="line1">
+                            <Setter Property="StrokeThickness" Value="0"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50*" />
+                        <RowDefinition Height="50*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" Margin="15,15,15,0">
+                            <input:SfChart AreaBorderThickness="0,1,1,1" x:Name="DiskUsageDataBindingChart" Visibility="Visible">
+                                <input:SfChart.Behaviors>
+                                    <input:ChartZoomPanBehavior />
+                                    <input:ChartTrackBallBehavior LineStyle="{StaticResource line1}"/>
+                                </input:SfChart.Behaviors>
+                                <input:SfChart.Header>
+                                    <TextBlock FontSize="14" FontFamily="Segoe UI" FontStyle="Normal">
+                              <Run FontWeight="Bold" Text="Disk usage" />
+                                    </TextBlock>
+                                </input:SfChart.Header>
+                                <input:SfChart.PrimaryAxis>
+                                    <input:DateTimeAxis 
+                                        ZoomPosition="{Binding ElementName=RangeNavigator, Path=ZoomPosition, Mode=TwoWay}" ZoomFactor="{Binding ElementName=RangeNavigator, Path=ZoomFactor, Mode=TwoWay}" x:Name="axis1" HeaderTemplate="{StaticResource headerTemplate}" Interval="500" LabelFormat="hh:mm:ss" LabelTemplate="{StaticResource labelTemplate}" AxisLineStyle="{StaticResource AxisStyle}" MajorTickLineStyle="{StaticResource AxisStyle}" />
+                                </input:SfChart.PrimaryAxis>
+                                <input:SfChart.SecondaryAxis>
+                                    <input:NumericalAxis StartRangeFromZero="False" 
+                                                         x:Name="axis2" Header="Data Points"
+                                                         HeaderTemplate="{StaticResource headerTemplate}" 
+                                                         LabelTemplate="{StaticResource labelTemplate}" 
+                                                         AxisLineStyle="{StaticResource AxisStyle}" 
+                                                         MajorTickLineStyle="{StaticResource AxisStyle}" />
+                                </input:SfChart.SecondaryAxis>
+                                <input:FastColumnBitmapSeries x:Name="DiskUsage" 
+                                                            StrokeThickness="1"
+                                                            
+                                                            ItemsSource="{Binding DiskUsage}" Interior="Red" XBindingPath="DateTime" YBindingPath="DataPoint" />
+                            </input:SfChart>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="15,15,22,0">
+                            <input:SfChart AreaBorderThickness="0,1,1,1" x:Name="MemoryUsageDataBindingChart" Visibility="Visible">
+                                <input:SfChart.Behaviors>
+                                    <input:ChartZoomPanBehavior />
+                                    <input:ChartTrackBallBehavior LineStyle="{StaticResource line1}"/>
+                                </input:SfChart.Behaviors>
+                                <input:SfChart.Header>
+                                    <TextBlock FontSize="14" FontFamily="Segoe UI" FontStyle="Normal">
+                              <Run FontWeight="Bold" Text="Memory usage" />
+                                    </TextBlock>
+                                </input:SfChart.Header>
+                                <input:SfChart.PrimaryAxis>
+                                    <input:DateTimeAxis 
+                                        ZoomPosition="{Binding ElementName=RangeNavigator, Path=ZoomPosition, Mode=TwoWay}" ZoomFactor="{Binding ElementName=RangeNavigator, Path=ZoomFactor, Mode=TwoWay}" x:Name="axis3" HeaderTemplate="{StaticResource headerTemplate}" Interval="500" LabelFormat="hh:mm:ss" LabelTemplate="{StaticResource labelTemplate}" AxisLineStyle="{StaticResource AxisStyle}" MajorTickLineStyle="{StaticResource AxisStyle}" />
+                                </input:SfChart.PrimaryAxis>
+                                <input:SfChart.SecondaryAxis>
+                                    <input:NumericalAxis StartRangeFromZero="False" x:Name="axis4" Header="Data Points" HeaderTemplate="{StaticResource headerTemplate}" LabelTemplate="{StaticResource labelTemplate}" AxisLineStyle="{StaticResource AxisStyle}" MajorTickLineStyle="{StaticResource AxisStyle}" />
+                                </input:SfChart.SecondaryAxis>
+                                <input:FastColumnBitmapSeries x:Name="MemoryUsage" 
+                                                            StrokeThickness="1"
+                                                            ItemsSource="{Binding MemoryUsage}" 
+                                                            XBindingPath="DateTime" Interior="Blue" YBindingPath="DataPoint" />
+                            </input:SfChart>
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" Margin="15,15,15,0">
+                            <input:SfChart AreaBorderThickness="0,1,1,1" x:Name="CpuUsageDataBindingChart" Visibility="Visible">
+                                <input:SfChart.Behaviors>
+                                    <input:ChartZoomPanBehavior />
+                                    <input:ChartTrackBallBehavior LineStyle="{StaticResource line1}"/>
+                                </input:SfChart.Behaviors>
+                                <input:SfChart.Header>
+                                    <TextBlock FontSize="14" FontFamily="Segoe UI" FontStyle="Normal">
+                              <Run FontWeight="Bold" Text="Cpu usage" />
+                                    </TextBlock>
+                                </input:SfChart.Header>
+                                <input:SfChart.PrimaryAxis>
+                                    <input:DateTimeAxis ZoomPosition="{Binding ElementName=RangeNavigator, Path=ZoomPosition, Mode=TwoWay}" ZoomFactor="{Binding ElementName=RangeNavigator, Path=ZoomFactor, Mode=TwoWay}" x:Name="axis5" HeaderTemplate="{StaticResource headerTemplate}" Interval="500" LabelFormat="hh:mm:ss" LabelTemplate="{StaticResource labelTemplate}" AxisLineStyle="{StaticResource AxisStyle}" MajorTickLineStyle="{StaticResource AxisStyle}" />
+                                </input:SfChart.PrimaryAxis>
+                                <input:SfChart.SecondaryAxis>
+                                    <input:NumericalAxis StartRangeFromZero="False" x:Name="axis6" Header="Data Points" HeaderTemplate="{StaticResource headerTemplate}" LabelTemplate="{StaticResource labelTemplate}" AxisLineStyle="{StaticResource AxisStyle}" MajorTickLineStyle="{StaticResource AxisStyle}" />
+                                </input:SfChart.SecondaryAxis>
+                                <input:FastColumnBitmapSeries x:Name="CpuUsage" 
+                                                            StrokeThickness="1"
+                                                            ItemsSource="{Binding CPUUsage}" XBindingPath="DateTime" Interior="Green" YBindingPath="DataPoint" />
+                            </input:SfChart>
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="15,15,22,0">
+                            <input:SfChart AreaBorderThickness="0,1,1,1" x:Name="NetworkUsageDataBindingChart" Visibility="Visible">
+                                <input:SfChart.Header>
+                                    <TextBlock FontSize="14" FontFamily="Segoe UI" FontStyle="Normal">
+                              <Run FontWeight="Bold" Text="Network usage" />
+                                    </TextBlock>
+                                </input:SfChart.Header>
+                                <input:SfChart.Behaviors>
+                                    <input:ChartZoomPanBehavior EnableSelectionZooming="True"/>
+                                    <input:ChartTrackBallBehavior LineStyle="{StaticResource line1}"/>
+                                </input:SfChart.Behaviors>
+                                <input:SfChart.PrimaryAxis>
+                                    <input:DateTimeAxis ZoomPosition="{Binding ElementName=RangeNavigator, Path=ZoomPosition, Mode=TwoWay}" ZoomFactor="{Binding ElementName=RangeNavigator, Path=ZoomFactor, Mode=TwoWay}" x:Name="axis7" HeaderTemplate="{StaticResource headerTemplate}" Interval="500" LabelFormat="hh:mm:ss" LabelTemplate="{StaticResource labelTemplate}" AxisLineStyle="{StaticResource AxisStyle}" MajorTickLineStyle="{StaticResource AxisStyle}" />
+                                </input:SfChart.PrimaryAxis>
+                                <input:SfChart.SecondaryAxis>
+                                    <input:NumericalAxis StartRangeFromZero="False" x:Name="axis8" Header="Data Points" HeaderTemplate="{StaticResource headerTemplate}" LabelTemplate="{StaticResource labelTemplate}" AxisLineStyle="{StaticResource AxisStyle}" MajorTickLineStyle="{StaticResource AxisStyle}" />
+                                </input:SfChart.SecondaryAxis>
+                                <input:FastColumnBitmapSeries x:Name="NetworkUsage" 
+                                                            StrokeThickness="1"
+                                                            ItemsSource="{Binding NetworkUsage}" XBindingPath="DateTime" Interior="Brown" YBindingPath="DataPoint" />
+                            </input:SfChart>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="3" Name="DateTimeNavigator" Visibility="Visible" Margin="30,10,30,10">
+            <Syncfusion:SfDateTimeRangeNavigator x:Name="RangeNavigator" ItemsSource="{Binding CPUUsage}" 
+                                                 ZoomFactor="0.9" ZoomPosition="1.0" EnableDeferredUpdate="True"
+                                                 XBindingPath="DateTime" Height="100">
+                <Syncfusion:SfDateTimeRangeNavigator.Intervals>
+                    <Syncfusion:Interval IntervalType="Hour" />
+                    <Syncfusion:Interval IntervalType="Day" />
+                </Syncfusion:SfDateTimeRangeNavigator.Intervals>
+                <Syncfusion:SfDateTimeRangeNavigator.Content>
+                    <Grid>
+                        <Syncfusion:SfChart>
+                            <Syncfusion:SfChart.PrimaryAxis>
+                                <Syncfusion:CategoryAxis Visibility="Collapsed"/>
+                            </Syncfusion:SfChart.PrimaryAxis>
+                            <Syncfusion:SfChart.SecondaryAxis>
+                                <Syncfusion:NumericalAxis Visibility="Collapsed"/>
+                            </Syncfusion:SfChart.SecondaryAxis>
+                            <Syncfusion:FastColumnBitmapSeries x:Name="CPUUsageLineSeries" Interior="Green" 
+                                                             ItemsSource="{Binding CPUUsage}" 
+                                                             XBindingPath="DateTime" 
+                                                             StrokeThickness="1" YBindingPath="DataPoint" />
+                            <Syncfusion:FastColumnBitmapSeries x:Name="DiskUsageLineSeries" Interior="Red"
+                                                             XBindingPath="DateTime" 
+                                                             ItemsSource="{Binding DiskUsage}" StrokeThickness="1"
+                                                             YBindingPath="DataPoint" />
+                            <Syncfusion:FastColumnBitmapSeries x:Name="MemoryUsageLineSeries" Interior="Blue" 
+                                                             ItemsSource="{Binding MemoryUsage}" StrokeThickness="1" 
+                                                             XBindingPath="DateTime" 
+                                                             YBindingPath="DataPoint" />
+                            <Syncfusion:FastColumnBitmapSeries x:Name="NetworkUsageLineSeries" Interior="Brown"
+                                                             ItemsSource="{Binding NetworkUsage}" StrokeThickness="1" 
+                                                             XBindingPath="DateTime" 
+                                                             YBindingPath="DataPoint" />
+
+                        </Syncfusion:SfChart>
+                    </Grid>
+                </Syncfusion:SfDateTimeRangeNavigator.Content>
+            </Syncfusion:SfDateTimeRangeNavigator>
+        </Grid>
+    </Grid>
+</Window>
