@@ -1,9 +1,5 @@
-1. Download the Application.
-2. Open the Application in Visual Studio. 
-3. Build the applciation in the Studio.
+1. Open and build the DataChecker project in Visual Studio.
+2. Run the console application using below command:
+	> Syncfusion.DataChecker.exe "logFileLocation‚Äù 	"TSDBHostName:PortNumber‚Äù
 
-Run the console application:
-Use below command to run the sample
-> Syncfusion.DataChecker.exe "logFileLocationî 	"TSDBHostName:PortNumberî
-
-Application will print that the ìData integrity check successî if the data from the log file is available in HBase. 
+Application will print ‚ÄúData integrity check success.‚Äù for the metric if the data from the log file is available in HBase.
