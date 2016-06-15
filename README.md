@@ -1,8 +1,8 @@
 ##Store Massive amounts of time series data using the Syncfusion Big Data Platform and Open TSDB
 
-We have setup the HBase cluster with the above cluster details using the [Syncfusion Big Data platform](https://www.syncfusion.com/products/big-data). No special configuration was initially needed. We simply used the cluster manager provided with the Syncfusion Big Data Platform to setup the cluster in a few minutes.
+We setup a Apache HBase cluster using the [Syncfusion Big Data platform](https://www.syncfusion.com/products/big-data). No special configuration was initially needed. We simply used the cluster manager provided with the Syncfusion Big Data Platform to setup the cluster in a few minutes. You may use a cluster of any size for testing (minimum size of 3 data nodes is recommended).
 
-We configured the OpenTSDB tool to perform read/write operations into HBase. To generate sustained writes, we have used a custom Go language client that interacts with OpenTSDB to write generated data points into HBase. The Go language was chosen for simulating writes since it has excellent support for concurrent execution of functions. It was very simple to scale to a high write rate with Go.
+We installed OpenTSDB on a single machine running Ubuntu. Installation directions are available [here](http://opentsdb.net/docs/build/html/installation.html#id1). We configured the OpenTSDB tool to perform read/write operations into Apache HBase running on the Syncfusion Big Data Platform. To generate sustained writes, we have used a custom Go language client that interacts with OpenTSDB to write generated data points into HBase. The Go language was chosen for simulating writes since it has excellent support for concurrent execution of functions. It was very simple to scale to a high write rate with Go.
 
 On the client side, we use a Windows Desktop client running on the Microsoft .NET Windows Presentation Foundation (WPF). Data from read operations was used to populate a rich chart UI. 
 
