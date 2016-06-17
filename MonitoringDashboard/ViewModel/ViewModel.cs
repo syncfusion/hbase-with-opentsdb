@@ -186,10 +186,10 @@ namespace MonitoringDashboard
             {
                 //Binds the values to Chart
                 var TSDBDataPoints = e.Result as Dictionary<string, ObservableCollection<TSDB>>;
-                CPUUsage = TSDBDataPoints["chart.cpu.usage"];
-                DiskUsage = TSDBDataPoints["chart.disk.usage"];
-                MemoryUsage = TSDBDataPoints["chart.memory.usage"];
-                NetworkUsage = TSDBDataPoints["chart.network.usage"];
+                CPUUsage = TSDBDataPoints["cpu.usage"];
+                DiskUsage = TSDBDataPoints["disk.usage"];
+                MemoryUsage = TSDBDataPoints["memory.usage"];
+                NetworkUsage = TSDBDataPoints["network.usage"];
             }
             catch(Exception Ex)
             {
